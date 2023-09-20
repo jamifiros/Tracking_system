@@ -25,7 +25,8 @@ use Illuminate\Support\Facades\Route;
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout',[ApiController::class,'logout'])->name('logout');
         Route::get('/getlist/{id}',[ApiController::class,'getlist'])->name('getlist');
+        Route::post('/addlist/{id}',[ApiController::class,'addlist'])->name('addlist');
         Route::post('/store',[ApiController::class,'store'])->name('store');
-        Route::post('/visitslist/{id}',[ApiController::class,'visitsList'])->name('visitslist');
         Route::get('/show/{id}',[ApiController::class,'show'])->name('show');
+        Route::put('/update/remarks/{id}',[ApiController::class,'update'])->name('update');
     });

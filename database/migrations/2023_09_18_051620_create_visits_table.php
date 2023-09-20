@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('visit_id')->references('id')->on('destinations');
-            $table->foreignId('user_id')->references('user_id')->on('destinations');
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->string('lattitude');
             $table->string('longitude');
             $table->string('remarks');

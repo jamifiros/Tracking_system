@@ -26,31 +26,27 @@ public function login(Request $request)
         'email' => 'required|email',
         'password' => 'required',
     ]);
-
     if (Auth::attempt($credentials)) {
         $user = Auth::user();
         $token = $user->createToken('api-token')->plainTextToken;
-
         return response()->json([
             'user_id' => $user->id,
             'token' => $token]);
     }
-
     throw ValidationException::withMessages([
         'email' => 'Invalid credentials',
     ]);
 }
 
+
+
 public function getlist($id)
 {
-   
     $user = User::with('destination')->find($id);
-
     if (!$user) {
         return response()->json(['message' => 'User not found'], 404);
     }
 
-    // return response()->json(['user' => $user]);
     $destinations = $user->destination->map(function ($destination) {
         return [
             'name' => $destination->destName,
@@ -63,10 +59,10 @@ public function getlist($id)
 }
 
 
+
 public function logout(Request $request)
 {
     $request->user()->tokens()->delete();
-
     return response()->json(['message' => 'Logged out successfully']);
 }
 
@@ -74,7 +70,6 @@ public function logout(Request $request)
 public function store(Request $request)
 {
     $input = $request->all();
-
     $validator = Validator::make($input, [
         'visit_id' => 'required|exists:destinations,id',
         'user_id' => 'required|exists:destinations,user_id',
@@ -114,26 +109,41 @@ public function store(Request $request)
 
 public function show($id)
 {
-    // Find the visit record by its ID
+    
     $visit = Visit::find($id);
 
     if (!$visit) {
         return response()->json(['error' => 'Visit not found'], 404);
     }
 
-    // Retrieve the associated destination record
-    
-
-    // You can customize the data you want to return in the response
     $data = [
-        
         'remarks' => $visit->remarks,
         'dest_img' => $visit->dest_img,
         'meter_img' => $visit->meter_img,
     ];
-
     return response()->json($data);
 }
 
+
+public function update(Request $request)
+{
+    $input = $request->all();
+
+    $validator = Validator::make($input, [
+        'visit_id' => 'required|exists:destinations,id',
+    ]);
+
+    if($validator->fails()){
+        return $this->sendError('Validation Error.', $validator->errors());       
+    }
+
+    $visit = Visit::find($id);
+    $visit->update([
+        'remarks' => request('remarks')
+    ]);
+    
+    return response()->json(['message' => 'Remarks updated successfully']);
+    
+}
 
 }
