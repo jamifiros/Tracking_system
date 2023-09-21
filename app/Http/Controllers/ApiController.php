@@ -127,32 +127,38 @@ public function show($id)
 
 public function update(Request $request, $id)
 {
-    // Validate the incoming request data
+    
     $validatedData = $request->validate([
         'remarks' => 'required|string',
     ]);
 
     try {
-        // Find the visit record by ID
+       
         $visit = Visit::find($id);
-
-        // Update the remark field
         $visit->remarks = $validatedData['remarks'];
-
-        // Save the updated record to the database
         $visit->save();
-
-        // Return a success response
+ 
         return response()->json(['message' => 'updated successfully'], 200);
     } catch (\Exception $e) {
-        // Handle any exceptions, e.g., visit record not found
         return response()->json(['message' => 'update failed'], 404);
     }
 }
 
-public function visitlist($id){
 
+public function visitlist($id) {
+   
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    $Destinations = $user->destination()->where('status', 1)->get();
+    return response()->json($Destinations);
 }
 
 
+public function addDestinations($id){
+
 }
+}
+
