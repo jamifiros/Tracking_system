@@ -28,7 +28,7 @@ class DestinationFactory extends Factory
         'destName' =>$this-> faker->company,
         'contactNo' =>$this-> faker->phoneNumber,
         'Location' =>$this-> faker->address,
-        // Add any other destination attributes here
+        
     ];
     }
 }

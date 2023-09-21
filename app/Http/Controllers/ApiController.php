@@ -31,6 +31,7 @@ public function login(Request $request)
         $token = $user->createToken('api-token')->plainTextToken;
         return response()->json([
             'user_id' => $user->id,
+            'name' => $user->name,
             'token' => $token]);
     }
     throw ValidationException::withMessages([
@@ -71,8 +72,8 @@ public function store(Request $request)
 {
     $input = $request->all();
     $validator = Validator::make($input, [
-        'visit_id' => 'required|exists:destinations,id',
-        'user_id' => 'required|exists:destinations,user_id',
+        'destination_id' => 'required|exists:destinations,id',
+        'user_id' => 'required|exists:users,id',
         'lattitude' => 'required',
         'longitude' => 'required',
         'remarks' => 'string',
@@ -88,7 +89,7 @@ public function store(Request $request)
     $meterImgPath = $request->file('meter_img')->store('public/images/meterImages');
 
     $visit = Visit::create([
-        'visit_id'=> request('visit_id'),
+        'destination_id'=> request('destination_id'),
         'user_id'=> request('user_id'),
         'lattitude'=> request('lattitude'),
         'longitude'=> request('longitude'),
@@ -96,7 +97,7 @@ public function store(Request $request)
         'dest_img' => $destImgPath,
         'meter_img' =>$meterImgPath
     ]);
-    $destination = Destination::find($visit->visit_id);
+    $destination = Destination::find($visit->destination_id);
     $destination->update([
         'status' => 1,
         'visited' => now(),
@@ -115,35 +116,43 @@ public function show($id)
     if (!$visit) {
         return response()->json(['error' => 'Visit not found'], 404);
     }
-
     $data = [
         'remarks' => $visit->remarks,
         'dest_img' => $visit->dest_img,
         'meter_img' => $visit->meter_img,
     ];
+
     return response()->json($data);
 }
 
-
-public function update(Request $request)
+public function update(Request $request, $id)
 {
-    $input = $request->all();
-
-    $validator = Validator::make($input, [
-        'visit_id' => 'required|exists:destinations,id',
+    // Validate the incoming request data
+    $validatedData = $request->validate([
+        'remarks' => 'required|string',
     ]);
 
-    if($validator->fails()){
-        return $this->sendError('Validation Error.', $validator->errors());       
+    try {
+        // Find the visit record by ID
+        $visit = Visit::find($id);
+
+        // Update the remark field
+        $visit->remarks = $validatedData['remarks'];
+
+        // Save the updated record to the database
+        $visit->save();
+
+        // Return a success response
+        return response()->json(['message' => 'updated successfully'], 200);
+    } catch (\Exception $e) {
+        // Handle any exceptions, e.g., visit record not found
+        return response()->json(['message' => 'update failed'], 404);
     }
-
-    $visit = Visit::find($id);
-    $visit->update([
-        'remarks' => request('remarks')
-    ]);
-    
-    return response()->json(['message' => 'Remarks updated successfully']);
-    
 }
+
+public function visitlist($id){
+
+}
+
 
 }
