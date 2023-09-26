@@ -50,6 +50,7 @@ public function getlist($id)
 
     $destinations = $user->destination->map(function ($destination) {
         return [
+            'destination_id' => $destination->id,
             'name' => $destination->destName,
             'contact_number' => $destination->contactNo,
             'location' => $destination->Location,
@@ -117,6 +118,7 @@ public function show($id)
         return response()->json(['error' => 'Visit not found'], 404);
     }
     $data = [
+        'visit_id' => $visit->id,
         'remarks' => $visit->remarks,
         'dest_img' => $visit->dest_img,
         'meter_img' => $visit->meter_img,
@@ -158,34 +160,8 @@ public function visitlist($id) {
 }
 
 
-// public function addlist(Request $request, $id)
-// {
-//     // Validate the incoming request data
-//     $validatedData = $request->validate([
-//         'destName' => 'required|string',
-//         'contactNo' => 'required|string',
-//         'Location' => 'required|string',
-//     ]);
 
-//     // Check if the user exists
-//     $user = User::find($id);
 
-//     if (!$user) {
-//         return response()->json(['message' => 'User not found'], 404);
-//     }
-//     $destination->user_id = $id; 
-//     $destination = new Destination([
-//         'destName' => $validatedData['destName'],
-//         'contactNo' => $validatedData['contactNo'],
-//         'Location' => $validatedData['Location'],
-//     ]);
-
-//     // Associate the destination with the user
-    
-//     $destination->save();
-
-//     return response()->json(['message' => 'Destination added successfully'], 201);
-// }
 
 }
 
