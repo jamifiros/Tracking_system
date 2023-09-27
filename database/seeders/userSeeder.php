@@ -16,12 +16,13 @@ class userSeeder extends Seeder
      */
     public function run()
     {
-      
+       
         for ($i = 1; $i <= 5; $i++) {
             $user = User::create([
                 'name' => 'User ' . $i,
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('mypassword'),
+
             ]);
 
             for ($j = 1; $j <= 5; $j++) {

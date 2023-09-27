@@ -19,27 +19,25 @@ use Illuminate\Support\Facades\Hash;
 class ApiController extends Controller
 {
 
-
 public function login(Request $request)
 {
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-    if (Auth::attempt($credentials)) {
-        $user = Auth::user();
-        $token = $user->createToken('api-token')->plainTextToken;
+    if (!Auth::attempt($request->only('email', 'password'))) {
         return response()->json([
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'token' => $token]);
+            'message' => 'Invalid login'
+        ], 401);
     }
-    throw ValidationException::withMessages([
-        'email' => 'Invalid credentials',
+
+    $user = User::where('email', $request['email'])->firstOrFail();
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'user_id' => $user->id,
+        'name' => $user->name,
+        'access_token' => $token,
+        
     ]);
 }
-
-
 
 public function getlist($id)
 {
@@ -85,46 +83,59 @@ public function store(Request $request)
     if($validator->fails()){
         return $this->sendError('Validation Error.', $validator->errors());       
     }
-    
-    $destImgPath = $request->file('dest_img')->store('public/images/destinationImages');
-    $meterImgPath = $request->file('meter_img')->store('public/images/meterImages');
+    $id = $request->input('destination_id');
+    $destination = Visit::where('destination_id', $id)->first();
+  
+    if (is_null($destination)) {
+        $destImgPath = $request->file('dest_img')->store('destinationImages', 'public');
+        $meterImgPath = $request->file('meter_img')->store('meterImages', 'public');
+        
+        $visit = Visit::create([
+            'destination_id'=> request('destination_id'),
+            'user_id'=> request('user_id'),
+            'lattitude'=> request('lattitude'),
+            'longitude'=> request('longitude'),
+            'remarks'=> request('remarks'),
+            'dest_img' => $destImgPath,
+            'meter_img' =>$meterImgPath
+        ]);
+        $destination = Destination::find($visit->destination_id);
+        $destination->update([
+            'status' => 1,
+            'visited' => now(),
+        ]);
 
-    $visit = Visit::create([
-        'destination_id'=> request('destination_id'),
-        'user_id'=> request('user_id'),
-        'lattitude'=> request('lattitude'),
-        'longitude'=> request('longitude'),
-        'remarks'=> request('remarks'),
-        'dest_img' => $destImgPath,
-        'meter_img' =>$meterImgPath
-    ]);
-    $destination = Destination::find($visit->destination_id);
-    $destination->update([
-        'status' => 1,
-        'visited' => now(),
-    ]);
-    return response()->json(['message' => 'submitted successfully']);
-
+        return response()->json(['message' => 'submitted successfully']); 
+    }
+else{
+    return response()->json(['message' => 'visit already exists..!']); 
+}
+   
    
 }
 
 
+
+
 public function show($id)
 {
+     $destination = Destination::find($id);
+     if (!$destination) {
+         return response()->json(['message' => 'destination not found'], 404);
+     }
     
-    $visit = Visit::find($id);
-
+     $visit =  $destination->visit;
     if (!$visit) {
         return response()->json(['error' => 'Visit not found'], 404);
     }
     $data = [
         'visit_id' => $visit->id,
         'remarks' => $visit->remarks,
-        'dest_img' => $visit->dest_img,
-        'meter_img' => $visit->meter_img,
-    ];
+        'dest_img'  => asset('storage/' . $visit->dest_img),
+        'meter_img' => asset('storage/' . $visit->meter_img)
+     ];
 
-    return response()->json($data);
+     return response()->json($data);
 }
 
 
@@ -160,8 +171,59 @@ public function visitlist($id) {
 }
 
 
+public function addlist(Request $request,$id)
+{
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    $validatedData = $request->validate([
+        'destName' => 'required|string',
+        'contactNo' => 'required|string',
+        'Location' => 'required|string',
+    ]);
+
+Destination::create([
+    'user_id' => $user->id,
+    'destName' => request('destName'),
+    'contactNo' => request('contactNo'),
+    'Location' => request('Location'),
+]);
+    return response()->json(['message' => 'Destination created successfully'], 201);
+}
 
 
+public function password(Request $request, $id)
+{
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    $validatedData = $request->validate([
+        'password' => 'required|string',
+        'new_password' => 'required|string', 
+    ]);
+
+    // Verify the current password
+    if (!Hash::check($validatedData['password'], $user->password)) {
+        return response()->json(['message' => 'Current password is incorrect'], 400);
+    }
+
+    try {
+        // Update the user's password with the new password
+        $user->password = Hash::make($validatedData['new_password']);
+        $user->save();
+
+        return response()->json(['message' => 'Password updated successfully'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Update failed'], 500); 
+}
 
 }
 
+public function changeProfile(){
+    
+}
+}

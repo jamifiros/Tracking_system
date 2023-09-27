@@ -9,6 +9,10 @@ class Destination extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'user_id',
+        'destName',
+        'contactNo',
+        'Location',
         'status',
         'visited'
     ];
@@ -18,7 +22,7 @@ class Destination extends Model
 
     public function visit()
     {
-        return $this->hasOne(Visit::class,'visit_id','id');
+        return $this->hasOne(Visit::class,'destination_id','id');
     }
 
    
