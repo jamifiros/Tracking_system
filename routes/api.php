@@ -31,4 +31,5 @@ use Illuminate\Support\Facades\Route;
         Route::put('/update/{id}',[ApiController::class,'update'])->name('update');
         Route::get('/visitlist/{id}',[ApiController::class,'visitlist'])->name('visitlist');
         Route::put('/update/password/{id}',[ApiController::class,'password'])->name('password');
+        Route::post('/update/profileimage/{id}',[ApiController::class,'changeprofile'])->name('changeprofile');
     });

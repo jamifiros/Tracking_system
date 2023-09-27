@@ -9,11 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Destination;
 use Laravel\Sanctum\PersonalAccessTokenResult;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Visit;
-
-use Illuminate\Support\Facades\Storage;
-
 use Illuminate\Support\Facades\Hash;
 
 class ApiController extends Controller
@@ -30,10 +28,19 @@ public function login(Request $request)
     $user = User::where('email', $request['email'])->firstOrFail();
 
     $token = $user->createToken('auth_token')->plainTextToken;
+    
+    if ($user->profile_image !== null) {
+        $imagePath = asset('storage/' . $user->profile_image);
+    } else {
+        $imagePath = null;
+    }
 
     return response()->json([
         'user_id' => $user->id,
         'name' => $user->name,
+        'email' => $user->email,
+        'contact_no' => $user->contact_no,
+        'image_url' =>$imagePath,
         'access_token' => $token,
         
     ]);
@@ -109,12 +116,8 @@ public function store(Request $request)
     }
 else{
     return response()->json(['message' => 'visit already exists..!']); 
+}  
 }
-   
-   
-}
-
-
 
 
 public function show($id)
@@ -128,11 +131,12 @@ public function show($id)
     if (!$visit) {
         return response()->json(['error' => 'Visit not found'], 404);
     }
+
     $data = [
         'visit_id' => $visit->id,
         'remarks' => $visit->remarks,
-        'dest_img'  => asset('storage/' . $visit->dest_img),
-        'meter_img' => asset('storage/' . $visit->meter_img)
+        'dest_img'  => asset('/'.'storage/' . $visit->dest_img),
+        'meter_img' => asset('/'.'storage/' . $visit->meter_img)
      ];
 
      return response()->json($data);
@@ -223,7 +227,45 @@ public function password(Request $request, $id)
 
 }
 
-public function changeProfile(){
+
+    public function changeprofile(Request $request, $id)
+    {
+         // Find the user by ID
+         $user = User::find($id);
+
+         if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+          }
+        if ($request->hasFile('profile_image')) {
+            // Validate the request
+             $request->validate([
+                'profile_image' => 'image|mimes:jpeg,jpg,png', // Adjust allowed image formats
+             ]);
+
+              try {
+                // Delete the old profile image (if it exists)
+                if ($user->profile_image) {
+                    Storage::delete('public/' . $user->profile_image);
+                }
+             $profileImgPath = $request->file('profile_image')->store('profileImages', 'public');
+
+            $user->update([
+               'profile_image' => $profileImgPath   
+             ]);
+             return response()->json(['message' => 'Profile image updated successfully']);
+            }
+             catch (\Exception $e) {
+                return response()->json(['message' => 'Profile image update failed'], 500);
+             }
+            } else {
+                return response()->json(['message' => 'No image uploaded'], 400);
+            }
     
+    }
 }
-}
+
+
+
+    
+
+

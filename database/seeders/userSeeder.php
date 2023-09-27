@@ -22,7 +22,7 @@ class userSeeder extends Seeder
                 'name' => 'User ' . $i,
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('mypassword'),
-
+                'contact_no' => '+1234567890',
             ]);
 
             for ($j = 1; $j <= 5; $j++) {
