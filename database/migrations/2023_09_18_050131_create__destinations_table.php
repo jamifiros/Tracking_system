@@ -17,8 +17,10 @@ return new class extends Migration
             $table->string('destName');
             $table->string('contactNo');
             $table->string('Location');
+            $table->date('scheduled_date');
+            $table->time('scheduled_time');
             $table->tinyInteger('status')->default(0)->comment('0:not_visited,1:visited');
-            $table->timestamp('visited')->nullable();
+            $table->timestamp('visited_date')->nullable();
             $table->timestamps();
         });
     }

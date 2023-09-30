@@ -3,7 +3,7 @@
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,8 +20,7 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-
-    Route::post('login',[ApiController::class,'login'])->name('login');
+Route::post('login',[ApiController::class,'login'])->name('login');
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout',[ApiController::class,'logout'])->name('logout');
         Route::get('/getlist/{id}',[ApiController::class,'getlist'])->name('getlist');
@@ -29,7 +28,9 @@ use Illuminate\Support\Facades\Route;
         Route::post('/store',[ApiController::class,'store'])->name('store');
         Route::get('/show/visit/{id}',[ApiController::class,'show'])->name('show');
         Route::put('/update/{id}',[ApiController::class,'update'])->name('update');
-        Route::get('/visitlist/{id}',[ApiController::class,'visitlist'])->name('visitlist');
+        // Route::get('/visitlist/{id}',[ApiController::class,'visitlist'])->name('visitlist');
         Route::put('/update/password/{id}',[ApiController::class,'password'])->name('password');
         Route::post('/update/profileimage/{id}',[ApiController::class,'changeprofile'])->name('changeprofile');
+        Route::get('/show/updatedimage/{id}',[ApiController::class,'showprofile'])->name('showprofile');
     });
+  

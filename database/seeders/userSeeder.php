@@ -16,6 +16,18 @@ class userSeeder extends Seeder
      */
     public function run()
     {
+        $dateOptions = [
+            '2023-09-30',
+            '2023-10-01',
+            '2023-10-02',
+        ];
+
+        $timeOptions = [
+            '09:30:00',
+            '10:00:00',
+            '11:15:00',
+            '14:30:00',
+        ];
        
         for ($i = 1; $i <= 5; $i++) {
             $user = User::create([
@@ -25,12 +37,16 @@ class userSeeder extends Seeder
                 'contact_no' => '+1234567890',
             ]);
 
-            for ($j = 1; $j <= 5; $j++) {
+            for ($j = 1; $j <= 10; $j++) {
+                $randomDate = $dateOptions[array_rand($dateOptions)];
+                $randomTime = $timeOptions[array_rand($timeOptions)];
                 Destination::create([
                     'user_id' => $user->id,
                     'destName' => 'Destination ' . $j,
                     'contactNo'=> '+0123456789',
-                    'Location' =>'Location' . $j
+                    'Location' =>'Location' . $j,
+                    'scheduled_date' => $randomDate,
+                    'scheduled_time' => $randomTime,
                 ]);
             }
         }

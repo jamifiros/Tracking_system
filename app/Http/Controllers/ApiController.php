@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Destination;
 use Laravel\Sanctum\PersonalAccessTokenResult;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
@@ -46,24 +48,43 @@ public function login(Request $request)
     ]);
 }
 
-public function getlist($id)
+public function getlist($id, Request $request)
 {
     $user = User::with('destination')->find($id);
+
     if (!$user) {
         return response()->json(['message' => 'User not found'], 404);
     }
 
-    $destinations = $user->destination->map(function ($destination) {
+    // Get the scheduled date from the request, or default to the current date
+    $scheduledDate = $request->input('scheduled_date');
+
+    if (!$scheduledDate) {
+        // No scheduled date provided, use the current date
+        $scheduledDate = Carbon::now()->format('Y-m-d');
+    }
+
+    // Filter destinations based on the scheduled date
+    $filteredDestinations = $user->destination->filter(function ($destination) use ($scheduledDate) {
+        return $destination->scheduled_date == $scheduledDate;
+    });
+
+    $destinations = $filteredDestinations->map(function ($destination) {
         return [
             'destination_id' => $destination->id,
             'name' => $destination->destName,
             'contact_number' => $destination->contactNo,
             'location' => $destination->Location,
+            'scheduled_time' => $destination->scheduled_time,
+            'status'=> $destination->status,
+            'visited_date'=>$destination->visited_date
         ];
     });
 
     return response()->json(['destinations' => $destinations]);
 }
+
+
 
 
 
@@ -109,7 +130,7 @@ public function store(Request $request)
         $destination = Destination::find($visit->destination_id);
         $destination->update([
             'status' => 1,
-            'visited' => now(),
+            'visited_date' => now(),
         ]);
 
         return response()->json(['message' => 'submitted successfully']); 
@@ -163,16 +184,16 @@ public function update(Request $request, $id)
 }
 
 
-public function visitlist($id) {
+// public function visitlist($id) {
    
-    $user = User::find($id);
-    if (!$user) {
-        return response()->json(['message' => 'User not found'], 404);
-    }
+//     $user = User::find($id);
+//     if (!$user) {
+//         return response()->json(['message' => 'User not found'], 404);
+//     }
 
-    $Destinations = $user->destination()->where('status', 1)->get();
-    return response()->json($Destinations);
-}
+//     $Destinations = $user->destination()->where('status', 1)->get();
+//     return response()->json($Destinations);
+// }
 
 
 public function addlist(Request $request,$id)
@@ -186,6 +207,8 @@ public function addlist(Request $request,$id)
         'destName' => 'required|string',
         'contactNo' => 'required|string',
         'Location' => 'required|string',
+        'scheduled_date' =>'required|date',
+        'scheduled_time' => 'required|time',
     ]);
 
 Destination::create([
@@ -193,6 +216,8 @@ Destination::create([
     'destName' => request('destName'),
     'contactNo' => request('contactNo'),
     'Location' => request('Location'),
+    'scheduled_date' => request('scheduled_date'),
+    'scheduled_time' => request('scheduled_time')
 ]);
     return response()->json(['message' => 'Destination created successfully'], 201);
 }
@@ -228,7 +253,7 @@ public function password(Request $request, $id)
 }
 
 
-    public function changeprofile(Request $request, $id)
+public function changeprofile(Request $request, $id)
     {
          // Find the user by ID
          $user = User::find($id);
@@ -252,7 +277,7 @@ public function password(Request $request, $id)
             $user->update([
                'profile_image' => $profileImgPath   
              ]);
-             return response()->json(['message' => 'Profile image updated successfully']);
+             return response()->json(['message' => 'Profile image updated successfully'],200);
             }
              catch (\Exception $e) {
                 return response()->json(['message' => 'Profile image update failed'], 500);
@@ -260,7 +285,22 @@ public function password(Request $request, $id)
             } else {
                 return response()->json(['message' => 'No image uploaded'], 400);
             }
-    
+    }
+
+public function showprofile($id){
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($user->profile_image !== null) {
+            $imagePath = asset('storage/' . $user->profile_image);
+        } else {
+            $imagePath = null;
+        }
+        return response()->json([
+            'image_url' =>$imagePath,
+        ]);
     }
 }
 
