@@ -58,6 +58,7 @@ public function getlist($id, Request $request)
 
     // Get the scheduled date from the request, or default to the current date
     $scheduledDate = $request->input('scheduled_date');
+  
 
     if (!$scheduledDate) {
         // No scheduled date provided, use the current date
@@ -208,7 +209,7 @@ public function addlist(Request $request,$id)
         'contactNo' => 'required|string',
         'Location' => 'required|string',
         'scheduled_date' =>'required|date',
-        'scheduled_time' => 'required|time',
+        'scheduled_time' => 'required|date_format:H:i',
     ]);
 
 Destination::create([

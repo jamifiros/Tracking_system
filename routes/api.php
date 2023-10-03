@@ -34,3 +34,5 @@ Route::post('login',[ApiController::class,'login'])->name('login');
         Route::get('/show/updatedimage/{id}',[ApiController::class,'showprofile'])->name('showprofile');
     });
   
+    Route::post('/forgot/password',[ForgotPasswordController::class,'forgot'])->name('forgot');
+    Route::post('/checkcode',[ForgotPasswordController::class,'Check'])->name('Check');

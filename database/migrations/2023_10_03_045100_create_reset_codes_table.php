@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reset_code_passwords', function (Blueprint $table) {
+        Schema::create('reset_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->index();
+            $table->unsignedBigInteger('user_id');
             $table->string('code');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reset_code_passwords');
+        Schema::dropIfExists('reset_codes');
     }
 };

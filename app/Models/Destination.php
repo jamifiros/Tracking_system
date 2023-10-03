@@ -13,6 +13,8 @@ class Destination extends Model
         'destName',
         'contactNo',
         'Location',
+        'scheduled_date',
+        'scheduled_time',
         'status',
         'visited'
     ];

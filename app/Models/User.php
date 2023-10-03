@@ -55,4 +55,8 @@ class User extends Authenticatable
         return $this->hasMany(Visit::class,'destination_id','id');
     }
    
+    public function reset()
+    {
+        return $this->hasOne(ResetCode::class,'user_id','id');
+    }
 }
