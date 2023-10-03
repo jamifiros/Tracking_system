@@ -209,7 +209,7 @@ public function addlist(Request $request,$id)
         'contactNo' => 'required|string',
         'Location' => 'required|string',
         'scheduled_date' =>'required|date',
-        'scheduled_time' => 'required|date_format:H:i',
+        'scheduled_time' => 'required|date_format:H:i'
     ]);
 
 Destination::create([
