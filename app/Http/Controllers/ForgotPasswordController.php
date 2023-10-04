@@ -10,7 +10,8 @@ use App\Models\ResetCode;
 class ForgotPasswordController extends Controller
 {
     public function forgot(){
-        $user = User::where('email',request('email'))->first();
+
+        $user = User::where ('email',request('email'))->first();
     
         if ($user){
         $code = mt_rand(1000, 9999);

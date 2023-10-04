@@ -48,6 +48,7 @@ public function login(Request $request)
     ]);
 }
 
+
 public function getlist($id, Request $request)
 {
     $user = User::with('destination')->find($id);
@@ -58,7 +59,20 @@ public function getlist($id, Request $request)
 
     // Get the scheduled date from the request, or default to the current date
     $scheduledDate = $request->input('scheduled_date');
-  
+    $validationRule = [
+        'scheduled_date' => 'date_format:Y-m-d',
+    ];
+
+     // Perform validation
+     $validator = Validator::make($request->all(), $validationRule);
+
+     if ($validator->fails()) {
+         // Validation failed, return an error response
+         return response()->json([
+             'message' => 'Invalid date format for scheduled_date',
+             'errors' => $validator->errors(),
+         ], 400);
+     }
 
     if (!$scheduledDate) {
         // No scheduled date provided, use the current date
@@ -185,17 +199,6 @@ public function update(Request $request, $id)
 }
 
 
-// public function visitlist($id) {
-   
-//     $user = User::find($id);
-//     if (!$user) {
-//         return response()->json(['message' => 'User not found'], 404);
-//     }
-
-//     $Destinations = $user->destination()->where('status', 1)->get();
-//     return response()->json($Destinations);
-// }
-
 
 public function addlist(Request $request,$id)
 {
@@ -208,9 +211,10 @@ public function addlist(Request $request,$id)
         'destName' => 'required|string',
         'contactNo' => 'required|string',
         'Location' => 'required|string',
-        'scheduled_date' =>'required|date',
+        'scheduled_date' =>'required',
         'scheduled_time' => 'required|date_format:H:i'
     ]);
+
 
 Destination::create([
     'user_id' => $user->id,
@@ -265,7 +269,7 @@ public function changeprofile(Request $request, $id)
         if ($request->hasFile('profile_image')) {
             // Validate the request
              $request->validate([
-                'profile_image' => 'image|mimes:jpeg,jpg,png', // Adjust allowed image formats
+                'profile_image' => 'image|mimes:jpeg,jpg,png',
              ]);
 
               try {
