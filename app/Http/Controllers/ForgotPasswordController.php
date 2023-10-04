@@ -37,7 +37,7 @@ public function Check(Request $request)
 {
     // Validate the request data
     $validatedData = $request->validate([
-        'code' => 'required|exists:reset_codes,code', // Correct table name and column name
+        'code' => 'required|exists:reset_codes,code', 
         'password' => 'required',
     ]);
 

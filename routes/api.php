@@ -16,22 +16,20 @@ use App\Http\Controllers\ForgotPasswordController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::post('login',[ApiController::class,'login'])->name('login');
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () 
+    {
         Route::post('logout',[ApiController::class,'logout'])->name('logout');
         Route::get('/getlist/{id}',[ApiController::class,'getlist'])->name('getlist');
         Route::post('/addlist/{id}',[ApiController::class,'addlist'])->name('addlist');
         Route::post('/store',[ApiController::class,'store'])->name('store');
         Route::get('/show/visit/{id}',[ApiController::class,'show'])->name('show');
         Route::put('/update/{id}',[ApiController::class,'update'])->name('update');
-        // Route::get('/visitlist/{id}',[ApiController::class,'visitlist'])->name('visitlist');
+        Route::get('/pending/{id}',[ApiController::class,'pendinglist'])->name('pendinglist');
         Route::put('/update/password/{id}',[ApiController::class,'password'])->name('password');
         Route::post('/update/profileimage/{id}',[ApiController::class,'changeprofile'])->name('changeprofile');
         Route::get('/show/updatedimage/{id}',[ApiController::class,'showprofile'])->name('showprofile');
+
     });
   
     Route::post('/forgot/password',[ForgotPasswordController::class,'forgot'])->name('forgot');

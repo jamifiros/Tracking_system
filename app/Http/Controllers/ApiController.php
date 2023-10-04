@@ -48,7 +48,7 @@ public function login(Request $request)
     ]);
 }
 
-
+//get the list of destinations of user according to date
 public function getlist($id, Request $request)
 {
     $user = User::with('destination')->find($id);
@@ -102,14 +102,14 @@ public function getlist($id, Request $request)
 
 
 
-
+//perform logout
 public function logout(Request $request)
 {
     $request->user()->tokens()->delete();
     return response()->json(['message' => 'Logged out successfully']);
 }
 
-
+//save the visit details
 public function store(Request $request)
 {
     $input = $request->all();
@@ -155,7 +155,7 @@ else{
 }  
 }
 
-
+//show the saved details of the visit
 public function show($id)
 {
      $destination = Destination::find($id);
@@ -179,7 +179,7 @@ public function show($id)
 }
 
 
-
+//update the remarks 
 public function update(Request $request, $id)
 {
     $validatedData = $request->validate([
@@ -199,7 +199,7 @@ public function update(Request $request, $id)
 }
 
 
-
+//add new destination with date by user
 public function addlist(Request $request,$id)
 {
     $user = User::find($id);
@@ -228,6 +228,7 @@ Destination::create([
 }
 
 
+//change password by user
 public function password(Request $request, $id)
 {
     $user = User::find($id);
@@ -258,6 +259,7 @@ public function password(Request $request, $id)
 }
 
 
+//change profile image by user
 public function changeprofile(Request $request, $id)
     {
          // Find the user by ID
@@ -292,6 +294,8 @@ public function changeprofile(Request $request, $id)
             }
     }
 
+
+ //show profile image   
 public function showprofile($id){
         $user = User::find($id);
         if (!$user) {
@@ -307,6 +311,37 @@ public function showprofile($id){
             'image_url' =>$imagePath,
         ]);
     }
+
+//pending list
+public function pendinglist($id)
+{
+    $user = User::with('destination')->find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+        $scheduledDate = Carbon::now()->format('Y-m-d');
+    
+
+    // Filter destinations based on the scheduled date and status
+    $filteredDestinations = $user->destination->filter(function ($destination) use ($scheduledDate) {
+        return $destination->scheduled_date < $scheduledDate && $destination->status === 0;
+    });
+
+    $destinations = $filteredDestinations->map(function ($destination) {
+        return [
+            'destination_id' => $destination->id,
+            'name' => $destination->destName,
+            'contact_number' => $destination->contactNo,
+            'location' => $destination->Location,
+            'scheduled_date' => $destination->scheduled_date,
+            'scheduled_time' => $destination->scheduled_time
+        ];
+    });
+
+    return response()->json(['destinations' => $destinations]);
+}
+
 }
 
 
